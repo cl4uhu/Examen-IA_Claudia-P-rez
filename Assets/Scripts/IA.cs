@@ -17,13 +17,13 @@ public class IA : MonoBehaviour
     private NavMeshAgent agent; 
     private Transform player; 
     [SerializeField] private Transform[] patrolPoints; 
-    [SerializeField] private float detectionRange; 
-    [SerializeField] private float attackingRange; 
+    [SerializeField] private float detectionRange = 15; 
+    [SerializeField] private float attackingRange = 5; 
     
     void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
-        player = GameObject.FindWithTag("Player"); 
+        player = GameObject.FindWithTag("Player").transform; 
     }
     
     void Start()
@@ -42,7 +42,7 @@ public class IA : MonoBehaviour
             case State.Chasing:
                 Chase(); 
             break; 
-            case State.Attackig:
+            case State.Attacking:
                 Attack(); 
             break; 
         }
@@ -69,7 +69,7 @@ public class IA : MonoBehaviour
             currentState = State.Patrolling;
         }
         
-        if(IsInRange(_attackingRange) == true)
+        if(IsInRange(attackingRange) == true)
         {
             currentState = State.Attacking;
         }
@@ -85,22 +85,34 @@ public class IA : MonoBehaviour
 
     void SetRandomPoint()
     {
-        agent.position = patrolPoints(Random.Range(0, patrolPoints.Length - 1)) < range; 
+        agent.destination = patrolPoints[Random.Range(0, patrolPoints.Length)].position; 
     }
 
     bool IsInRange(float range)
     {
-
+        if(Vector3.Distance(transform.position, player.position) < range)
+        {
+            return true; 
+        }
+        
+        else
+        {
+            return false; 
+        }
     }
 
     void OnDrawGizmos() 
     {
         Gizmos.color = Color.blue;
+        foreach(Transform point in patrolPoints)
+        {
+            Gizmos.DrawWireSphere (transform.position, 1f);
+        }
 
         Gizmos.color = Color.green;
-        Gizmos.DrawWireSphere = 
+        Gizmos.DrawWireSphere (transform.position, detectionRange);
 
-        Gizmos.Color = Color.red;
-        Gizmos.DrawWireSphere = 
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere (transform.position, attackingRange);
     }
 }
